@@ -32,11 +32,13 @@ from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn.svm import SVC 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neural_network import BernoulliRBM
 from sklearn.ensemble import VotingClassifier
+from xgboost import XGBClassifier
+
 
 # Getting all data
 f = open('PickleFiles/input.pckl', 'rb')
@@ -77,54 +79,53 @@ x_data, y_data = smt.fit_sample(x_data, y_data)
 X_train, X_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.33, random_state = 42)
 ##############################################################################################
 # Stacking three models
-models = [KNeighborsClassifier(n_neighbors=15, weights='distance', algorithm='brute'), 
+models = [ExtraTreesClassifier(random_state=0, n_estimators=150, bootstrap=True, oob_score=True, warm_start=True),
+             RandomForestClassifier(n_estimators=75, random_state=0, bootstrap=True, oob_score=True, warm_start=True), 
              DecisionTreeClassifier(random_state=0, presort=True), 
-             RandomForestClassifier(n_estimators=50, random_state=0, bootstrap=True, oob_score=True, warm_start=True)]
+             XGBClassifier(random_state=0)]
 
 S_train, S_test = stacking(models, X_train, y_train, X_test, regression=False, mode='oof_pred_bag', 
                     needs_proba=False, save_dir=None, metric=accuracy_score, n_folds=4, stratified=True,
                     shuffle=True, random_state=0, verbose=1)
 
-model = DecisionTreeClassifier(random_state=0, presort=True)
-    
+model = GradientBoostingClassifier(random_state=0, warm_start=True, loss="deviance", n_estimators=400)
 model = model.fit(S_train, y_train)
 y_pred = model.predict(S_test)
-
 metrics = []
 metrics.append(['f1score',f1_score(y_pred, y_test)])
 metrics.append(['accuracy',accuracy_score(y_pred, y_test)])
-
 print(metrics)
 print("#################################################################################")
-#Didn't really increase performance
+
+#Increased performance a bit
 ##############################################################################################
 
 # Hard Voting Classifier with three models
-clf1 = KNeighborsClassifier(n_neighbors=15, weights='distance', algorithm='brute')
+clf1 = ExtraTreesClassifier(random_state=0, n_estimators=150, bootstrap=True, oob_score=True, warm_start=True)
 clf2 = DecisionTreeClassifier(random_state=0, presort=True)
 clf3 = RandomForestClassifier(n_estimators=50, random_state=0, bootstrap=True, oob_score=True, warm_start=True)
 clf4 = LogisticRegression(random_state=None, max_iter=900, solver='newton-cg', penalty='l2')
 
-eclf = VotingClassifier(estimators=[('kn', clf1), ('dt', clf2), ('rf', clf3), ('lr', clf4)], voting='hard')
+eclf = VotingClassifier(estimators=[('et', clf1), ('dt', clf2), ('rf', clf3), ('lr', clf4)], voting='hard')
 
-for clf, label in zip([clf1, clf2, clf3, clf4, eclf], ['K Neighbors Classifier', 'Decision Tree', 'Random Forest', 'Logistic Regression', 'Ensemble']):
+for clf, label in zip([clf1, clf2, clf3, clf4, eclf], ['Extra Trees Classifier', 'Decision Tree', 'Random Forest', 'Logistic Regression', 'Ensemble']):
     scores = cross_val_score(clf, x_data, y_data, cv=5, scoring='accuracy')
     print("Accuracy: " + str(scores.mean()) + " +/- " + str(scores.std()) + " " + label)
 
 print("#################################################################################")
-#Didn't really increase performance
+#Acheived 91% accuracy with margin when models were extra trees, decision tree, random forest, logistic regression
 ##############################################################################################
 
 # Soft Voting Classifier with three models
-clf1 = KNeighborsClassifier(n_neighbors=15, weights='distance', algorithm='brute')
+clf1 = ExtraTreesClassifier(random_state=0, n_estimators=150, bootstrap=True, oob_score=True, warm_start=True)
 clf2 = DecisionTreeClassifier(random_state=0, presort=True)
 clf3 = RandomForestClassifier(n_estimators=50, random_state=0, bootstrap=True, oob_score=True, warm_start=True)
 clf4 = LogisticRegression(random_state=None, max_iter=900, solver='newton-cg', penalty='l2')
 clf5 = GradientBoostingClassifier(random_state=0, warm_start=True, loss="deviance", n_estimators=400)
 
-eclf = VotingClassifier(estimators=[('kn', clf1), ('dt', clf2), ('rf', clf3), ('lr', clf4), ('gb', clf5)], voting='soft', weights=[1, 1, 2, 2, 2])
+eclf = VotingClassifier(estimators=[('et', clf1), ('dt', clf2), ('rf', clf3), ('lr', clf4), ('gb', clf5)], voting='soft', weights=[2, 1, 2, 2, 1])
 
-for clf, label in zip([clf1, clf2, clf3, clf4, clf5, eclf], ['K Neighbors Classifier', 'Decision Tree', 'Random Forest', 'Logistic Regression', 'Gradient Boosting', 'Ensemble']):
+for clf, label in zip([clf1, clf2, clf3, clf4, clf5, eclf], ['Extra Trees Classifier', 'Decision Tree', 'Random Forest', 'Logistic Regression', 'Gradient Boosting', 'Ensemble']):
     scores = cross_val_score(clf, x_data, y_data, cv=5, scoring='accuracy')
     print("Accuracy: " + str(scores.mean()) + " +/- " + str(scores.std()) + " " + label)
 

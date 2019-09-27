@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import numpy as np
 import tensorflow as tf
 import random as rn
@@ -171,7 +174,7 @@ print('################')
 
 # Random Forest - create model and fit
 def RandomForest(X_train, X_test, y_train, y_test):
-    model = RandomForestClassifier(n_estimators=50, random_state=0, bootstrap=True, oob_score=True, warm_start=True)
+    model = RandomForestClassifier(n_estimators=75, random_state=0, bootstrap=True, oob_score=True, warm_start=True)
     model.fit(X_train, y_train)
     # use the model to make predictions with the test data
     y_pred = model.predict(X_test)
@@ -190,7 +193,7 @@ print('################')
 
 # Extra Trees Classifier - create model and fit
 def ExtraTrees(X_train, X_test, y_train, y_test):
-    model = ExtraTreesClassifier(random_state=0, n_estimators=100)
+    model = ExtraTreesClassifier(random_state=0, n_estimators=150, bootstrap=True, oob_score=True, warm_start=True)
     model.fit(X_train, y_train)
     # use the model to make predictions with the test data
     y_pred = model.predict(X_test)

@@ -13,28 +13,36 @@ from keras.utils import np_utils
 from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 
-fields = ['SEX', 'AGE', 'RACE', 'ZIP', 'SMOKING_RISK', 'DX_CODE', 'RADON_RISK']
-
+fields = ['PAT_MRN_ID', 'SEX', 'AGE', 'RACE', 'ZIP', 'SMOKING_RISK', 'DX_CODE', 'RADON_RISK']
 # Total of 6302 data points
-df = pd.read_csv('smoking_radon_deid2.csv', usecols = fields)
+df1 = pd.read_csv('Data_Request_Final.csv', usecols = fields)
+
+fields = ['PAT_MRN_ID', 'decile_pscore']
+# Total of 4437 data points
+df2 = pd.read_csv('pscore_umit_sep2019.csv', usecols = fields)
+
+df = pd.merge(df1, df2, left_on='PAT_MRN_ID', right_on='PAT_MRN_ID')
+df = df.dropna()
+
+df['DX_CODE'] = np.where(df['DX_CODE'].str.contains('^C34'), 'cancer', df['DX_CODE'])
+df['DX_CODE'] = np.where(df['DX_CODE'].str.contains('^J44'), 'cancer', df['DX_CODE'])
+df['DX_CODE'] = np.where(df['DX_CODE'].str.contains('162'), 'cancer', df['DX_CODE'])
+df['DX_CODE'] = np.where(df['DX_CODE'].str.contains('1'), 'Other', df['DX_CODE'])
+df['DX_CODE'] = np.where(df['DX_CODE'].str.contains('2'), 'Other', df['DX_CODE'])
+df['DX_CODE'] = np.where(df['DX_CODE'].str.contains('9'), 'Other', df['DX_CODE'])
+
 
 # Converting all the features to lists
-sex_list = (df.SEX).values.tolist()
-age_list = (df.AGE).values.tolist()
+sex_list = (df.SEX).values.tolist() # there is nan
+age_list = (df.AGE).values.tolist() 
 race_list = (df.RACE).values.tolist()
 smoking_risk_list = (df.SMOKING_RISK).values.tolist()
 radon_risk_list = (df.RADON_RISK).values.tolist()
 zip_list = (df.ZIP).values.tolist()
+pscore_list = (df.decile_pscore).values.tolist() # has nan
 
 # Converting labels to lists
 dx_code_list = (df.DX_CODE).values.tolist()
-
-# function to get unique values 
-def unique(list1):  
-    list_set = set(list1) 
-    unique_list = (list(list_set)) 
-    for x in unique_list: 
-        print(x)
 
 def list_to_vec(sex_list, race_list, dx_code_list, zip_list):
     a = []
@@ -76,7 +84,7 @@ def list_to_vec(sex_list, race_list, dx_code_list, zip_list):
 sex_list, race_list, dx_code_list, zip_list = list_to_vec(sex_list, race_list, dx_code_list, zip_list)
 
 input_data = []
-def create_input_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, input_data):
+def create_input_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, input_data, pscore_list):
     for i in range(len(sex_list)):
         patient = []
         patient.append(sex_list[i])
@@ -85,20 +93,19 @@ def create_input_data(sex_list, age_list, race_list, smoking_risk_list, radon_ri
         patient.append(smoking_risk_list[i])
         patient.append(radon_risk_list[i])
         patient.append(zip_list[i])
+        patient.append(pscore_list[i])
         input_data.append(patient)
     return input_data
 
-x_data = create_input_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, input_data)
-x_data = np.array(x_data)
+x_data = create_input_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, input_data, pscore_list)
 
-# One-hot code the labels
 labels = np.array(dx_code_list)
 l = np_utils.to_categorical(labels)
 y_data = l
 
 #Splitting for institutions and then processing
 data = []
-def create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, dx_code_list, data):
+def create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, dx_code_list, pscore_list, data):
     for i in range(len(sex_list)):
         patient = []
         patient.append(sex_list[i])
@@ -107,10 +114,12 @@ def create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk
         patient.append(smoking_risk_list[i])
         patient.append(radon_risk_list[i])
         patient.append(zip_list[i])
+        patient.append(pscore_list[i])
         patient.append(dx_code_list[i])
         data.append(patient)
     return data
-data = create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, dx_code_list, data)
+data = create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, dx_code_list, pscore_list, data)
+
 rn.shuffle(data)
 marker = round(len(data) * 0.4)
 num_institutions = [1, 2]

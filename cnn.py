@@ -41,7 +41,7 @@ f = open('PickleFiles/input.pckl', 'rb')
 x_data = pickle.load(f)
 f.close()
 
-f = open('PickleFiles/labels.pckl', 'rb')
+f = open('PickleFiles/one_hot_labels.pckl', 'rb')
 y_data = pickle.load(f)
 f.close()
 
@@ -98,11 +98,11 @@ X_test = np.expand_dims(X_test, axis=2)
 def cnn(x_train):
     optm = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     model = Sequential()
-    model.add(Conv1D(128, 7, activation='relu', padding='same', input_shape=X_train.shape[1:]))
+    model.add(Conv1D(64, 7, activation='relu', padding='same', input_shape=X_train.shape[1:]))
     model.add(MaxPooling1D(2))
-    model.add(Conv1D(128, 7, activation='relu', padding='same'))
+    model.add(Conv1D(64, 7, activation='relu', padding='same'))
     model.add(GlobalMaxPooling1D())
-    model.add(Dense(64, activation='relu', kernel_regularizer=regularizers.l2(1e-4)))
+    model.add(Dense(32, activation='relu', kernel_regularizer=regularizers.l2(1e-4)))
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer=optm, metrics=['accuracy'])
     return model
