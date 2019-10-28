@@ -112,7 +112,7 @@ def create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk
     return data
 data = create_all_data(sex_list, age_list, race_list, smoking_risk_list, radon_risk_list, zip_list, dx_code_list, data)
 rn.shuffle(data)
-marker = round(len(data) * 0.4)
+marker = round(len(data) * 0.3)
 num_institutions = [1, 2]
 
 def create_institusional_data(data, num_institutions, marker):
@@ -169,11 +169,16 @@ input_institutional_data2, labels_institutional_data2, test_input, test_labels =
 #Subject to change according to number of institutions
 institution_1_input = input_institutional_data2[0]
 institution_2_input = input_institutional_data2[1]
+#institution_3_input = input_institutional_data2[2]
+#institution_4_input = input_institutional_data2[3]
 institution_1_labels = labels_institutional_data2[0]
 institution_2_labels = labels_institutional_data2[1]
+#institution_3_labels = labels_institutional_data2[2]
+#institution_4_labels = labels_institutional_data2[3]
 
 # Saving x and y data
-def save_all_variables(x_data, y_data, labels, institution_1_input, institution_2_input, institution_1_labels, institution_2_labels, test_input, test_labels):
+def save_all_variables(x_data, y_data, labels, institution_1_input, institution_2_input, institution_1_labels, institution_2_labels, 
+test_input, test_labels):
     f = open('PickleFiles/input.pckl', 'wb')
     pickle.dump(x_data, f)
     f.close()
@@ -209,6 +214,26 @@ def save_all_variables(x_data, y_data, labels, institution_1_input, institution_
     f.close()
     print("Saved institution 2 labels")
 
+    # f = open('SingleWeightTransfer/PickleFiles/institution_3_input.pckl', 'wb')
+    # pickle.dump(institution_3_input, f)
+    # f.close()
+    # print("Saved institution 3 input data")
+
+    # f = open('SingleWeightTransfer/PickleFiles/institution_4_input.pckl', 'wb')
+    # pickle.dump(institution_4_input, f)
+    # f.close()
+    # print("Saved institution 4 input data")
+
+    # f = open('SingleWeightTransfer/PickleFiles/institution_3_labels.pckl', 'wb')
+    # pickle.dump(institution_3_labels, f)
+    # f.close()
+    # print("Saved institution 3 labels")
+
+    # f = open('SingleWeightTransfer/PickleFiles/institution_4_labels.pckl', 'wb')
+    # pickle.dump(institution_4_labels, f)
+    # f.close()
+    # print("Saved institution 4 labels")
+
     f = open('SingleWeightTransfer/PickleFiles/test_input.pckl', 'wb')
     pickle.dump(test_input, f)
     f.close()
@@ -239,6 +264,26 @@ def save_all_variables(x_data, y_data, labels, institution_1_input, institution_
     f.close()
     print("Saved institution 2 labels")
 
+    # f = open('CyclicalWeightTransfer/PickleFiles/institution_3_input.pckl', 'wb')
+    # pickle.dump(institution_3_input, f)
+    # f.close()
+    # print("Saved institution 3 input data")
+
+    # f = open('CyclicalWeightTransfer/PickleFiles/institution_4_input.pckl', 'wb')
+    # pickle.dump(institution_4_input, f)
+    # f.close()
+    # print("Saved institution 4 input data")
+
+    # f = open('CyclicalWeightTransfer/PickleFiles/institution_3_labels.pckl', 'wb')
+    # pickle.dump(institution_3_labels, f)
+    # f.close()
+    # print("Saved institution 3 labels")
+
+    # f = open('CyclicalWeightTransfer/PickleFiles/institution_4_labels.pckl', 'wb')
+    # pickle.dump(institution_4_labels, f)
+    # f.close()
+    # print("Saved institution 4 labels")
+
     f = open('CyclicalWeightTransfer/PickleFiles/test_input.pckl', 'wb')
     pickle.dump(test_input, f)
     f.close()
@@ -249,4 +294,5 @@ def save_all_variables(x_data, y_data, labels, institution_1_input, institution_
     f.close()
     print("Saved test labels")
 
-save_all_variables(x_data, y_data, labels, institution_1_input, institution_2_input, institution_1_labels, institution_2_labels, test_input, test_labels)
+save_all_variables(x_data, y_data, labels, institution_1_input, institution_2_input, institution_1_labels, institution_2_labels, 
+test_input, test_labels)
