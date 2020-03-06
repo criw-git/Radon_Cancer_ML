@@ -72,9 +72,6 @@ def deleteFeatures(sex, age, race, smoking, radon, zipc, x_data):
 
 x_data = deleteFeatures(False, False, False, False, False, False, x_data)
 
-smt = SMOTE()
-x_data, y_data = smt.fit_sample(x_data, y_data)
-
 # Function to get metrics
 def evaluate_model(metrics, model, y_test, X_test):
     y_pred=model.predict(X_test,verbose=1)
@@ -92,6 +89,9 @@ X_train, X_test, y_train, y_test = train_test_split(x_data, y_data, test_size=0.
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.fit_transform(X_test)
+
+smt = SMOTE()
+X_train, y_train = smt.fit_sample(X_train, y_train)
 
 def model_with_cross_val(X_train, X_test, y_train, y_test):
     def ann(X_train):
