@@ -85,7 +85,6 @@ X_test = deleteFeatures(False, False, False, False, False, False, X_test)
 
 smt = SMOTE()
 X_train, y_train = smt.fit_sample(X_train, y_train)
-X_test, y_test = smt.fit_sample(X_test, y_test)
 
 # Function to get metrics
 def evaluate_model(metrics, model, y_test, X_test):
